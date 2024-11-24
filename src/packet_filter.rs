@@ -14,7 +14,14 @@ pub fn start_packet_filtering(interface_name: Option<&str>) {
         interfaces
             .into_iter()
             .find(|iface| iface.name == name)
-            .expect("Specified network interface not found")
+            .unwrap_or_else(|| {
+                eprintln!("Specified network interface '{}' not found.", name);
+                eprintln!("Available interfaces:");
+                for iface in datalink::interfaces() {
+                    eprintln!("- {}", iface.name);
+                }
+                std::process::exit(1);
+            })
     } else {
         interfaces
             .into_iter()
